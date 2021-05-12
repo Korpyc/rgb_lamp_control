@@ -1,4 +1,4 @@
-package com.example.rgb_lamp_control
+package rgb.lamp.control
 
 import io.flutter.embedding.android.FlutterActivity
 
