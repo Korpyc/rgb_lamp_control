@@ -1,64 +1,48 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:rgb_lamp_control/cubits/blue_adapter_cubit/blue_adapter_cubit.dart';
+import 'package:rgb_lamp_control/cubits/blue_device_cubit/blue_device_cubit.dart';
+import 'package:rgb_lamp_control/screens/blue_off_screen/blue_off_screen.dart';
+import 'package:rgb_lamp_control/screens/connection_screen/connection_screen.dart';
+import 'package:rgb_lamp_control/screens/tab_screen/tab_screen.dart';
+import 'package:rgb_lamp_control/services/services.dart';
 
 void main() {
+  servicesSetup();
   runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: MyHomePage(title: 'Flutter'),
-    );
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key? key, required this.title}) : super(key: key);
-
-  final String title;
-
-  @override
-  _MyHomePageState createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
+    return BlocProvider(
+      create: (context) => BlueAdapterBloc(),
+      child: BlocProvider(
+        create: (context) => BlueDeviceBloc(),
+        child: MaterialApp(
+          title: 'Flutter',
+          theme: ThemeData(
+            primarySwatch: Colors.blue,
+          ),
+          home: BlocBuilder<BlueAdapterBloc, BlueAdapterState>(
+            builder: (context, state) {
+              if (state is BlueOnState) {
+                return BlocBuilder<BlueDeviceBloc, BlueDeviceState>(
+                  builder: (context, state) {
+                    if (state is BlueDeviceInitial) {
+                      return ConnectionScreen();
+                    }
+                    return TabScreen();
+                  },
+                );
+              } else if (state is BlueAdapterInitial) {
+                return Container();
+              } else {
+                return BluetoothErrorScreen();
+              }
+            },
+          ),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
       ),
     );
   }
