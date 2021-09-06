@@ -11,7 +11,7 @@ class BluetoothErrorScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.lightBlue,
-      body: BlocBuilder<BlueAdapterBloc, BlueAdapterState>(
+      body: BlocBuilder<BlueAdapterCubit, BlueAdapterState>(
         builder: (context, state) {
           return Center(
             child: Column(

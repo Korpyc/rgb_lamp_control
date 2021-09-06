@@ -1,6 +1,5 @@
 part of 'blue_adapter_cubit.dart';
 
-@immutable
 abstract class BlueAdapterState {}
 
 class BlueAdapterInitial extends BlueAdapterState {}

@@ -26,6 +26,7 @@ dependencies:
   flutter_bloc: ^7.1.0
   get_it: ^7.2.0
   flutter_blue: ^0.8.0
+  sleek_circular_slider: ^2.0.1
 
 
   # The following adds the Cupertino Icons font to your application.

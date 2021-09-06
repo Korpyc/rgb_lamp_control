@@ -2,13 +2,13 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:flutter_blue/flutter_blue.dart';
-import 'package:meta/meta.dart';
+
 import 'package:rgb_lamp_control/services/services.dart';
 
 part 'blue_adapter_state.dart';
 
-class BlueAdapterBloc extends Cubit<BlueAdapterState> {
-  BlueAdapterBloc() : super(BlueAdapterInitial()) {
+class BlueAdapterCubit extends Cubit<BlueAdapterState> {
+  BlueAdapterCubit() : super(BlueAdapterInitial()) {
     _getBlueState();
   }
 

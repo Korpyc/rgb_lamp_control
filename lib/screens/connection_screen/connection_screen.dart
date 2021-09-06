@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import 'package:rgb_lamp_control/blocs/blue_device_bloc/blue_device_bloc.dart';
+import 'package:rgb_lamp_control/screens/main_screen/main_screen.dart';
 
 class ConnectionScreen extends StatefulWidget {
   const ConnectionScreen({Key? key}) : super(key: key);
@@ -37,58 +41,115 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
               child: SingleChildScrollView(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                  child: Column(
-                    children: <Widget>[
-                      StreamBuilder<List<ScanResult>>(
-                        stream: FlutterBlue.instance.scanResults,
-                        initialData: [],
-                        builder: (c, snapshot) {
-                          if (snapshot.hasData) {
-                            return ValueListenableBuilder<bool>(
-                              valueListenable: _isUnNamedShown,
-                              builder: (context, value, child) {
-                                List<Widget> listOfDevices = [];
-                                for (dynamic elem in snapshot.data!) {
-                                  if (!value) {
-                                    if (elem.advertisementData.connectable &&
-                                        elem.device.name.length >= 1) {
+                  child: BlocListener<BlueDeviceBloc, BlueDeviceState>(
+                    listener: (context, state) {
+                      if (state is BlueDeviceConnected) {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => MainScreen(),
+                          ),
+                        );
+                      }
+                    },
+                    child: Column(
+                      children: <Widget>[
+                        StreamBuilder<List<BluetoothDevice>>(
+                          stream: Stream.periodic(Duration(seconds: 2))
+                              .asyncMap(
+                                  (_) => FlutterBlue.instance.connectedDevices),
+                          initialData: [],
+                          builder: (c, snapshot) => Column(
+                            children: snapshot.data!
+                                .map((d) => ListTile(
+                                      title: Text(d.name),
+                                      subtitle: Text(d.id.toString()),
+                                      trailing:
+                                          StreamBuilder<BluetoothDeviceState>(
+                                        stream: d.state,
+                                        initialData:
+                                            BluetoothDeviceState.disconnected,
+                                        builder: (c, snapshot) {
+                                          if (snapshot.data ==
+                                              BluetoothDeviceState.connected) {
+                                            return MaterialButton(
+                                              child: Text('OPEN'),
+                                              onPressed: () => context
+                                                  .read<BlueDeviceBloc>()
+                                                  .add(
+                                                    BlueDeviceConnect(
+                                                      d,
+                                                    ),
+                                                  ),
+                                            );
+                                          }
+                                          return Text(snapshot.data.toString());
+                                        },
+                                      ),
+                                    ))
+                                .toList(),
+                          ),
+                        ),
+                        StreamBuilder<List<ScanResult>>(
+                          stream: FlutterBlue.instance.scanResults,
+                          initialData: [],
+                          builder: (c, snapshot) {
+                            if (snapshot.hasData) {
+                              return ValueListenableBuilder<bool>(
+                                valueListenable: _isUnNamedShown,
+                                builder: (context, value, child) {
+                                  List<Widget> listOfDevices = [];
+                                  for (ScanResult result in snapshot.data!) {
+                                    if (!value) {
+                                      if (result
+                                              .advertisementData.connectable &&
+                                          result.device.name.length >= 1) {
+                                        listOfDevices.add(
+                                          ScanResultTile(
+                                            result: result,
+                                            onTap: () async {
+                                              context
+                                                  .read<BlueDeviceBloc>()
+                                                  .add(
+                                                    BlueDeviceConnect(
+                                                      result.device,
+                                                    ),
+                                                  );
+                                            },
+                                          ),
+                                        );
+                                      }
+                                    } else {
                                       listOfDevices.add(
                                         ScanResultTile(
-                                          result: elem,
+                                          result: result,
                                           onTap: () {},
                                         ),
                                       );
                                     }
-                                  } else {
-                                    listOfDevices.add(
-                                      ScanResultTile(
-                                        result: elem,
-                                        onTap: () {},
+                                  }
+                                  if (listOfDevices.length >= 1) {
+                                    return Column(
+                                      children: listOfDevices,
+                                    );
+                                  } else
+                                    return Container(
+                                      child: Text(
+                                        'No devices was found',
                                       ),
                                     );
-                                  }
-                                }
-                                if (listOfDevices.length >= 1) {
-                                  return Column(
-                                    children: listOfDevices,
-                                  );
-                                } else
-                                  return Container(
-                                    child: Text(
-                                      'No devices was found',
-                                    ),
-                                  );
-                              },
+                                },
+                              );
+                            }
+                            return Container(
+                              child: Text(
+                                'No devices was found',
+                              ),
                             );
-                          }
-                          return Container(
-                            child: Text(
-                              'No devices was found',
-                            ),
-                          );
-                        },
-                      ),
-                    ],
+                          },
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
