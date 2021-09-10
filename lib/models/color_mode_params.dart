@@ -10,7 +10,7 @@ class ColorModeParams {
   int get numberOfColor => _numberOfColor;
 
   ColorModeParams({
-    int brightness = 127,
+    int brightness = 128,
     int whiteColor = 0,
     int numberOfColor = 0,
   })  : _brightness = brightness,

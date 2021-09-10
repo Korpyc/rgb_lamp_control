@@ -3,12 +3,14 @@ import 'dart:async';
 import 'package:flutter_blue/flutter_blue.dart';
 
 import 'package:rgb_lamp_control/models/color_mode_params.dart';
+import 'package:rgb_lamp_control/models/fire_mode_params.dart';
 import 'package:rgb_lamp_control/models/rgb_mode_params.dart';
 import 'package:rgb_lamp_control/util/constants.dart';
 
 enum BlueDeviceMode {
   rgb,
   color,
+  fire,
   undefined,
 }
 
@@ -134,6 +136,15 @@ class BlueDeviceService {
             );
             break;
           }
+        case BlueDeviceMode.fire:
+          {
+            lastRecievedParameters = FireModeParams(
+              brightness: listOfParameters[0],
+              speed: listOfParameters[1],
+              min: listOfParameters[2],
+            );
+            break;
+          }
 
         default:
           {
@@ -145,6 +156,13 @@ class BlueDeviceService {
   }
 
   BlueDeviceMode parseCurrentMode(String mode) {
+    /*  print('\n');
+    print('\n');
+    print('\n');
+    print('Mode is - $mode');
+    print('\n');
+    print('\n');
+    print('\n'); */
     switch (mode) {
       case '1':
         return BlueDeviceMode.rgb;
@@ -152,6 +170,8 @@ class BlueDeviceService {
         return BlueDeviceMode.rgb;
       case '3':
         return BlueDeviceMode.color;
+      case '7':
+        return BlueDeviceMode.fire;
 
       default:
         return BlueDeviceMode.undefined;
@@ -197,6 +217,11 @@ class BlueDeviceService {
       case BlueDeviceMode.color:
         {
           setModeCommand = AppConstants.colorModeCommand;
+          break;
+        }
+      case BlueDeviceMode.fire:
+        {
+          setModeCommand = AppConstants.fireModeCommand;
           break;
         }
 

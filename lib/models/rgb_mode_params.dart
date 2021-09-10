@@ -14,7 +14,7 @@ class RGBModeParams {
   get blueColor => _blueColor;
 
   RGBModeParams({
-    int brightness = 127,
+    int brightness = 128,
     int whiteColor = 0,
     int redColor = 0,
     int greenColor = 0,

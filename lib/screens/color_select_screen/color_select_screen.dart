@@ -34,84 +34,96 @@ class ColorSelectScreen extends StatelessWidget {
           if (params != null) {
             context.read<ColorSelectCubit>().update(params);
           }
-          return SingleChildScrollView(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ColorPickerSlider(
-                  startValue: params?.brightness,
-                  type: ColorPickerSliderType.brightness,
-                  onChange: (int value) {
-                    context.read<ColorSelectCubit>().sendParams(
-                          brightness: value,
-                        );
-                  },
-                ),
-                ColorPickerSlider(
-                  startValue: params?.whiteColor,
-                  type: ColorPickerSliderType.white,
-                  onChange: (int value) {
-                    context.read<ColorSelectCubit>().sendParams(
-                          whiteColor: value,
-                        );
-                  },
-                ),
-                ValueListenableBuilder<Color>(
-                  valueListenable: currentColor,
-                  builder: (context, value, child) => Container(
-                    width: 100,
-                    height: 100,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: value,
+          return LayoutBuilder(
+            builder: (
+              context,
+              constraints,
+            ) =>
+                SizedBox(
+              height: constraints.maxHeight,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      height: 24,
                     ),
-                  ),
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
-                SleekCircularSlider(
-                  initialValue: params?.numberOfColor.toDouble() ?? 0.0,
-                  min: 0,
-                  max: 1530,
-                  appearance: CircularSliderAppearance(
-                    animationEnabled: false,
-                    customWidths: CustomSliderWidths(
-                      handlerSize: 12,
-                      progressBarWidth: 48,
-                      trackWidth: 12,
+                    ColorPickerSlider(
+                      startValue: params?.brightness,
+                      type: ColorPickerSliderType.brightness,
+                      onChange: (int value) {
+                        context.read<ColorSelectCubit>().sendParams(
+                              brightness: value,
+                            );
+                      },
                     ),
-                    customColors: CustomSliderColors(
-                      progressBarColors: [
-                        Color.fromRGBO(255, 0, 0, 1),
-                        Color.fromRGBO(255, 0, 254, 1),
-                        Color.fromRGBO(255, 0, 255, 1),
-                        Color.fromRGBO(1, 0, 255, 1),
-                        Color.fromRGBO(0, 0, 255, 1),
-                        Color.fromRGBO(0, 254, 255, 1),
-                        Color.fromRGBO(0, 255, 255, 1),
-                        Color.fromRGBO(0, 255, 1, 1),
-                        Color.fromRGBO(0, 255, 0, 1),
-                        Color.fromRGBO(254, 255, 0, 1),
-                        Color.fromRGBO(255, 255, 0, 1),
-                        Color.fromRGBO(255, 0, 0, 1),
-                      ],
+                    ColorPickerSlider(
+                      startValue: params?.whiteColor,
+                      type: ColorPickerSliderType.white,
+                      onChange: (int value) {
+                        context.read<ColorSelectCubit>().sendParams(
+                              whiteColor: value,
+                            );
+                      },
                     ),
-                    infoProperties: InfoProperties(modifier: (value) {
-                      return '${value.round()}';
-                    }),
-                    size: MediaQuery.of(context).size.width * 0.8,
-                    startAngle: 180,
-                    angleRange: 180,
-                  ),
-                  onChange: (double value) {
-                    currentColor.value = colorWheel(value.round());
-                    context.read<ColorSelectCubit>().sendParams(
-                          numberOfColor: value.round(),
-                        );
-                  },
+                    ValueListenableBuilder<Color>(
+                      valueListenable: currentColor,
+                      builder: (context, value, child) => Container(
+                        width: 100,
+                        height: 100,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: value,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    SleekCircularSlider(
+                      initialValue: params?.numberOfColor.toDouble() ?? 0.0,
+                      min: 0,
+                      max: 1530,
+                      appearance: CircularSliderAppearance(
+                        animationEnabled: false,
+                        customWidths: CustomSliderWidths(
+                          handlerSize: 12,
+                          progressBarWidth: 48,
+                          trackWidth: 12,
+                        ),
+                        customColors: CustomSliderColors(
+                          progressBarColors: [
+                            Color.fromRGBO(255, 0, 0, 1),
+                            Color.fromRGBO(255, 0, 254, 1),
+                            Color.fromRGBO(255, 0, 255, 1),
+                            Color.fromRGBO(1, 0, 255, 1),
+                            Color.fromRGBO(0, 0, 255, 1),
+                            Color.fromRGBO(0, 254, 255, 1),
+                            Color.fromRGBO(0, 255, 255, 1),
+                            Color.fromRGBO(0, 255, 1, 1),
+                            Color.fromRGBO(0, 255, 0, 1),
+                            Color.fromRGBO(254, 255, 0, 1),
+                            Color.fromRGBO(255, 255, 0, 1),
+                            Color.fromRGBO(255, 0, 0, 1),
+                          ],
+                        ),
+                        infoProperties: InfoProperties(modifier: (value) {
+                          return '${value.round()}';
+                        }),
+                        size: MediaQuery.of(context).size.width * 0.8,
+                        startAngle: 180,
+                        angleRange: 180,
+                      ),
+                      onChange: (double value) {
+                        currentColor.value = colorWheel(value.round());
+                        context.read<ColorSelectCubit>().sendParams(
+                              numberOfColor: value.round(),
+                            );
+                      },
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           );
         },

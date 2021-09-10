@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rgb_lamp_control/blocs/blue_device_bloc/blue_device_bloc.dart';
 import 'package:rgb_lamp_control/screens/color_picker_screen/color_picker_screen.dart';
 import 'package:rgb_lamp_control/screens/color_select_screen/color_select_screen.dart';
+import 'package:rgb_lamp_control/screens/fire_mode_screen/fire_mode_screen.dart';
 import 'package:rgb_lamp_control/services/blue_device/blue_device_service.dart';
 
 class MainScreen extends StatefulWidget {
@@ -28,6 +29,10 @@ class _MainScreenState extends State<MainScreen> {
         icon: Icon(Icons.color_lens),
         label: 'Color',
       ),
+      BottomNavigationBarItem(
+        icon: Icon(Icons.fireplace),
+        label: 'Fire',
+      ),
     ];
   }
 
@@ -49,6 +54,11 @@ class _MainScreenState extends State<MainScreen> {
                 {
                   changeScreenIndex(1);
                   return ColorSelectScreen();
+                }
+              case BlueDeviceMode.fire:
+                {
+                  changeScreenIndex(2);
+                  return FireModeScreen();
                 }
 
               default:

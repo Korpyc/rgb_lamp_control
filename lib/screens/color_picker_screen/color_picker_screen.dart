@@ -38,56 +38,68 @@ class _ColorPickerScreenState extends State<ColorPickerScreen> {
             if (params != null) {
               context.read<RGBModeCubit>().update(params);
             }
-            return SingleChildScrollView(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  ColorPickerSlider(
-                    type: ColorPickerSliderType.brightness,
-                    startValue: params?.brightness,
-                    onChange: (int value) {
-                      context.read<RGBModeCubit>().setRGB(
-                            brightness: value,
-                          );
-                    },
+            return LayoutBuilder(
+              builder: (
+                context,
+                constraints,
+              ) =>
+                  SizedBox(
+                height: constraints.maxHeight,
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        height: 24,
+                      ),
+                      ColorPickerSlider(
+                        type: ColorPickerSliderType.brightness,
+                        startValue: params?.brightness,
+                        onChange: (int value) {
+                          context.read<RGBModeCubit>().setRGB(
+                                brightness: value,
+                              );
+                        },
+                      ),
+                      ColorPickerSlider(
+                        type: ColorPickerSliderType.white,
+                        startValue: params?.whiteColor,
+                        onChange: (int value) {
+                          context.read<RGBModeCubit>().setRGB(
+                                whiteColor: value,
+                              );
+                        },
+                      ),
+                      ColorPickerSlider(
+                        type: ColorPickerSliderType.red,
+                        startValue: params?.redColor,
+                        onChange: (int value) {
+                          context.read<RGBModeCubit>().setRGB(
+                                redColor: value,
+                              );
+                        },
+                      ),
+                      ColorPickerSlider(
+                        type: ColorPickerSliderType.green,
+                        startValue: params?.greenColor,
+                        onChange: (int value) {
+                          context.read<RGBModeCubit>().setRGB(
+                                greenColor: value,
+                              );
+                        },
+                      ),
+                      ColorPickerSlider(
+                        type: ColorPickerSliderType.blue,
+                        startValue: params?.blueColor,
+                        onChange: (int value) {
+                          context.read<RGBModeCubit>().setRGB(
+                                blueColor: value,
+                              );
+                        },
+                      ),
+                    ],
                   ),
-                  ColorPickerSlider(
-                    type: ColorPickerSliderType.white,
-                    startValue: params?.whiteColor,
-                    onChange: (int value) {
-                      context.read<RGBModeCubit>().setRGB(
-                            whiteColor: value,
-                          );
-                    },
-                  ),
-                  ColorPickerSlider(
-                    type: ColorPickerSliderType.red,
-                    startValue: params?.redColor,
-                    onChange: (int value) {
-                      context.read<RGBModeCubit>().setRGB(
-                            redColor: value,
-                          );
-                    },
-                  ),
-                  ColorPickerSlider(
-                    type: ColorPickerSliderType.green,
-                    startValue: params?.greenColor,
-                    onChange: (int value) {
-                      context.read<RGBModeCubit>().setRGB(
-                            greenColor: value,
-                          );
-                    },
-                  ),
-                  ColorPickerSlider(
-                    type: ColorPickerSliderType.blue,
-                    startValue: params?.blueColor,
-                    onChange: (int value) {
-                      context.read<RGBModeCubit>().setRGB(
-                            blueColor: value,
-                          );
-                    },
-                  ),
-                ],
+                ),
               ),
             );
           },

@@ -22,4 +22,7 @@ class AppConstants {
 
   // Maximum color number value
   static const int maxNumberOfColorValue = 1530;
+
+  // Maximun speed value
+  static const int maxSpeedValue = 1000;
 }
