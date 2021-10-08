@@ -1,11 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-
-import 'package:rgb_lamp_control/blocs/blue_device_bloc/blue_device_bloc.dart';
-import 'package:rgb_lamp_control/screens/color_picker_screen/color_picker_screen.dart';
-import 'package:rgb_lamp_control/screens/color_select_screen/color_select_screen.dart';
-import 'package:rgb_lamp_control/screens/fire_mode_screen/fire_mode_screen.dart';
-import 'package:rgb_lamp_control/services/blue_device/blue_device_service.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({Key? key}) : super(key: key);
@@ -41,85 +34,19 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: BlocBuilder<BlueDeviceBloc, BlueDeviceState>(
-        builder: (context, state) {
-          if (state is BlueDeviceConnected) {
-            switch (state.mode) {
-              case BlueDeviceMode.rgb:
-                {
-                  changeScreenIndex(0);
-                  return ColorPickerScreen();
-                }
-              case BlueDeviceMode.color:
-                {
-                  changeScreenIndex(1);
-                  return ColorSelectScreen();
-                }
-              case BlueDeviceMode.fire:
-                {
-                  changeScreenIndex(2);
-                  return FireModeScreen();
-                }
-
-              default:
-                {
-                  AbsorbPointer(
-                    child: Stack(
-                      children: [
-                        ColorPickerScreen(),
-                        Container(
-                          height: double.infinity,
-                          width: double.infinity,
-                          color: Colors.grey.withOpacity(0.5),
-                        ),
-                      ],
-                    ),
-                  );
-                }
-            }
-          }
-          return AbsorbPointer(
-            child: Stack(
-              children: [
-                ColorPickerScreen(),
-                Container(
-                  height: double.infinity,
-                  width: double.infinity,
-                  color: Colors.grey.withOpacity(0.5),
-                ),
-              ],
-            ),
-          );
-        },
-      ),
-      bottomNavigationBar: ValueListenableBuilder<int>(
-        valueListenable: _selectedIndex,
-        builder: (context, value, child) => BottomNavigationBar(
-          items: _listOfTabs,
-          currentIndex: value,
-          onTap: (int index) {
-            context.read<BlueDeviceBloc>().add(
-                  BlueDeviceChangeMode(
-                    BlueDeviceMode.values[index],
-                  ),
-                );
-          },
-        ),
-      ),
-      floatingActionButton: BlocBuilder<BlueDeviceBloc, BlueDeviceState>(
-        builder: (context, state) {
-          Color buttonColor = Colors.red;
-          if (state is BlueDeviceConnected) {
-            buttonColor = state.isLedEnabled ? Colors.green : Colors.red;
-          }
-          return FloatingActionButton(
-            backgroundColor: buttonColor,
+      body: Container(
+        child: Center(
+          child: TextButton(
+            child: Text('press'),
             onPressed: () {
-              context.read<BlueDeviceBloc>().add(BlueDeviceSwitchLight());
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => SomeWidge(),
+                ),
+              );
             },
-            child: Icon(Icons.disabled_by_default),
-          );
-        },
+          ),
+        ),
       ),
     );
   }
@@ -130,6 +57,24 @@ class _MainScreenState extends State<MainScreen> {
       () {
         _selectedIndex.value = index;
       },
+    );
+  }
+}
+
+class SomeWidge extends StatelessWidget {
+  const SomeWidge({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: Center(
+        child: TextButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          child: Text('data'),
+        ),
+      ),
     );
   }
 }

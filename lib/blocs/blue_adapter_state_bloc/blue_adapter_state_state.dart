@@ -1,10 +1,10 @@
-part of 'blue_adapter_cubit.dart';
+part of 'blue_adapter_state_bloc.dart';
 
 abstract class BlueAdapterState {}
 
 class BlueAdapterInitial extends BlueAdapterState {}
 
-class BlueOnState extends BlueAdapterState {}
+class BlueAdapterOnState extends BlueAdapterState {}
 
 class BlueOFFState extends BlueAdapterState {
   @override
