@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:rgb_lamp_control/blocs/blue_adapter_state_bloc/blue_adapter_state_bloc.dart';
+import 'package:rgb_lamp_control/blocs/blue_device_bloc/blue_device_bloc.dart';
 import 'package:rgb_lamp_control/screens/blue_adapter_status_screen/blue_adapter_status_screen.dart';
 import 'package:rgb_lamp_control/screens/main_screen/main_screen.dart';
+import 'package:rgb_lamp_control/services/repositories/rgb_lamp_repo.dart';
 import 'package:rgb_lamp_control/services/services.dart';
 
 void main() {
@@ -14,22 +16,31 @@ void main() {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => BlueAdapterStateBloc(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) => BlueAdapterStateBloc(),
+        ),
+        BlocProvider(
+          create: (context) => BlueDeviceBloc(RgbLampRepoImpl(getIt())),
+        ),
+      ],
       child: MaterialApp(
-        home: BlocConsumer<BlueAdapterStateBloc, BlueAdapterState>(
-          listener: (context, state) {
-            //Navigator.of(context).popUntil((route) => route.isFirst);
-          },
-          builder: (context, state) {
-            if (state is BlueAdapterOnState) {
-              return MainScreen();
-            } else {
-              return BluetoothAdapterStatusScreen(
-                state: state,
-              );
-            }
-          },
+        home: SafeArea(
+          child: BlocConsumer<BlueAdapterStateBloc, BlueAdapterState>(
+            listener: (context, state) {
+              //Navigator.of(context).popUntil((route) => route.isFirst);
+            },
+            builder: (context, state) {
+              if (state is BlueAdapterOnState) {
+                return MainScreen();
+              } else {
+                return BluetoothAdapterStatusScreen(
+                  state: state,
+                );
+              }
+            },
+          ),
         ),
       ),
     );

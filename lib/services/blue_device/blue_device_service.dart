@@ -2,28 +2,78 @@ import 'dart:async';
 
 import 'package:flutter_blue/flutter_blue.dart';
 
-import 'package:rgb_lamp_control/models/color_mode_params.dart';
-import 'package:rgb_lamp_control/models/fire_mode_params.dart';
-import 'package:rgb_lamp_control/models/rgb_mode_params.dart';
+import 'package:rgb_lamp_control/models/found_bluetooth_device.dart';
+import 'package:rgb_lamp_control/services/services.dart';
 import 'package:rgb_lamp_control/util/constants.dart';
 
-enum BlueDeviceMode {
-  rgb,
-  color,
-  fire,
-  undefined,
-}
-
 class BlueDeviceService {
-  BluetoothDevice? _device;
+  bool isConnected = false;
+  bool _isScanStarted = false;
+
+  late FlutterBlue _bluetoothInstance;
+  StreamSubscription? _scanResultsListener;
+
+  StreamController<List<FoundDevice>> _availableToConnectDeviceList =
+      StreamController<List<FoundDevice>>();
+
+  Stream<List<FoundDevice>> get availableToConnectDeviceList =>
+      _availableToConnectDeviceList.stream;
+
+  BlueDeviceService() {
+    _bluetoothInstance = getIt<FlutterBlue>();
+    init();
+  }
+
+  void init() {
+    _initListenersOfBluetooth();
+  }
+
+  void _initListenersOfBluetooth() {
+    _scanResultsListener = _bluetoothInstance.scanResults.listen(
+      (results) {
+        List<FoundDevice> listOfFoundedDevices = [];
+        for (ScanResult result in results) {
+          try {
+            FoundDevice device = FoundDevice.fromScanResult(result);
+            listOfFoundedDevices.add(device);
+          } catch (e) {
+            print(e.toString());
+          }
+        }
+        _availableToConnectDeviceList.sink.add(listOfFoundedDevices);
+      },
+    );
+  }
+
+  Future<void> startScan({int duration = 4}) async {
+    if (!_isScanStarted) {
+      _isScanStarted = true;
+      List<ScanResult> result = await _bluetoothInstance.startScan(
+        timeout: Duration(seconds: duration),
+        withServices: [Guid(AppConstants.serviceUUID)],
+      );
+      _isScanStarted = false;
+      if (result.isEmpty) {
+        _availableToConnectDeviceList.sink.add([]);
+      }
+    }
+  }
+
+  void close() {
+    _scanResultsListener?.cancel();
+    _availableToConnectDeviceList.close();
+  }
+  /* BluetoothDevice? _device;
   BluetoothCharacteristic? _writePort;
   BluetoothCharacteristic? _listenPort;
   StreamSubscription? _listenPortSubscription;
+  StreamSubscription? _deviceStatusSubscription;
 
-  StreamController<String> _recieveStreamController =
+  StreamController<String> _deviceUpdatesStreamController =
       StreamController<String>();
 
-  Stream get recievedValueStream => _recieveStreamController.stream;
+  Stream get recievedValueStream => _deviceUpdatesStreamController.stream;
+
   bool get isConnected => _isDeviceConnected;
   bool get isLedEnabled => _isLightOn;
   bool _isDeviceConnected = false;
@@ -52,15 +102,23 @@ class BlueDeviceService {
           _listenPort = characteristic;
           _listenPortSubscription =
               _listenPort!.value.listen(processRecievedData);
-          characteristic.setNotifyValue(true);
         }
         if (characteristic.properties.write) {
           _writePort = characteristic;
         }
       }
-      _isDeviceConnected = true;
-
-      getStatus();
+      _deviceStatusSubscription = _device!.state.listen((state) {
+        if (state == BluetoothDeviceState.connected) {
+          _isDeviceConnected = true;
+          _listenPort?.setNotifyValue(true);
+          _deviceUpdatesStreamController.sink.add('Device conected');
+          getStatus();
+        }
+        if (state == BluetoothDeviceState.disconnected) {
+          _isDeviceConnected = false;
+          _deviceUpdatesStreamController.sink.add('Device disconected');
+        }
+      });
     } catch (e) {
       await _device!.disconnect();
       print(e);
@@ -102,7 +160,7 @@ class BlueDeviceService {
           break;
       }
 
-      _recieveStreamController.sink.add(parsedString);
+      _deviceUpdatesStreamController.sink.add(parsedString);
     }
   }
 
@@ -234,7 +292,7 @@ class BlueDeviceService {
 
   // Disconnect device
   Future<void> disconnectDevice() async {
-    _recieveStreamController.close();
+    _deviceUpdatesStreamController.close();
     _listenPortSubscription?.cancel();
     await _device?.disconnect();
     FlutterBlue.instance.connectedDevices.then(
@@ -244,5 +302,5 @@ class BlueDeviceService {
         },
       ),
     );
-  }
+  } */
 }

@@ -1,4 +1,4 @@
-import 'package:rgb_lamp_control/models/fire_mode_params.dart';
+/* import 'package:rgb_lamp_control/models/fire_mode_params.dart';
 import 'package:rgb_lamp_control/services/blue_device/blue_device_service.dart';
 import 'package:rgb_lamp_control/services/control_services/control_service.dart';
 import 'package:rgb_lamp_control/util/constants.dart';
@@ -50,3 +50,4 @@ class FireService extends ControlService {
     }
   }
 }
+ */

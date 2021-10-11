@@ -1,17 +1,16 @@
 part of 'blue_device_bloc.dart';
 
-@immutable
 abstract class BlueDeviceState {}
 
-class BlueDeviceInitial extends BlueDeviceState {}
+class BlueDeviceUnavailable extends BlueDeviceState {}
 
-class BlueDeviceConnected extends BlueDeviceState {
-  final bool isLedEnabled;
-  final BlueDeviceMode mode;
-  final parameters;
-  BlueDeviceConnected({
-    required this.isLedEnabled,
-    required this.mode,
-    required this.parameters,
+class BlueDeviceSearching extends BlueDeviceState {}
+
+class BlueDeviceFound extends BlueDeviceState {
+  final bool isStillSearching;
+  final List<FoundDevice> foundDevices;
+  BlueDeviceFound(
+    this.foundDevices, {
+    this.isStillSearching = false,
   });
 }
