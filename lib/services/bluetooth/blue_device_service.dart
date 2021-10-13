@@ -1,68 +1,137 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:flutter_blue/flutter_blue.dart';
 
-import 'package:rgb_lamp_control/models/found_bluetooth_device.dart';
-import 'package:rgb_lamp_control/services/services.dart';
 import 'package:rgb_lamp_control/util/constants.dart';
+import 'package:rgb_lamp_control/util/strings.dart';
 
 class BlueDeviceService {
-  bool isConnected = false;
-  bool _isScanStarted = false;
+  BluetoothDevice? _device;
+  StreamSubscription? _listenPortSubscription;
+  StreamSubscription? _deviceStatusSubscription;
+  BluetoothCharacteristic? _writePort;
+  BluetoothCharacteristic? _listenPort;
 
-  late FlutterBlue _bluetoothInstance;
-  StreamSubscription? _scanResultsListener;
+  StreamController<String> _deviceUpdatesStreamController =
+      StreamController<String>();
 
-  StreamController<List<FoundDevice>> _availableToConnectDeviceList =
-      StreamController<List<FoundDevice>>();
+  Stream get recievedValueStream => _deviceUpdatesStreamController.stream;
 
-  Stream<List<FoundDevice>> get availableToConnectDeviceList =>
-      _availableToConnectDeviceList.stream;
+  bool get isConnected => _isDeviceConnected;
+  bool _isDeviceConnected = false;
 
-  BlueDeviceService() {
-    _bluetoothInstance = getIt<FlutterBlue>();
-    init();
-  }
+  // Function to connect device and setup connection
+  Future<void> connectDevice(BluetoothDevice device) async {
+    _device = device;
+    try {
+      await _device!.connect(autoConnect: true);
 
-  void init() {
-    _initListenersOfBluetooth();
-  }
+      List<BluetoothService> discoverServices =
+          await _device!.discoverServices();
 
-  void _initListenersOfBluetooth() {
-    _scanResultsListener = _bluetoothInstance.scanResults.listen(
-      (results) {
-        List<FoundDevice> listOfFoundedDevices = [];
-        for (ScanResult result in results) {
-          try {
-            FoundDevice device = FoundDevice.fromScanResult(result);
-            listOfFoundedDevices.add(device);
-          } catch (e) {
-            print(e.toString());
-          }
-        }
-        _availableToConnectDeviceList.sink.add(listOfFoundedDevices);
-      },
-    );
-  }
-
-  Future<void> startScan({int duration = 4}) async {
-    if (!_isScanStarted) {
-      _isScanStarted = true;
-      List<ScanResult> result = await _bluetoothInstance.startScan(
-        timeout: Duration(seconds: duration),
-        withServices: [Guid(AppConstants.serviceUUID)],
-      );
-      _isScanStarted = false;
-      if (result.isEmpty) {
-        _availableToConnectDeviceList.sink.add([]);
+      if (_deviceUpdatesStreamController.isClosed) {
+        _deviceUpdatesStreamController = StreamController<String>();
       }
+
+      BluetoothService service = discoverServices.firstWhere(
+        (element) => element.uuid == Guid(AppConstants.serviceUUID),
+      );
+      for (var characteristic in service.characteristics) {
+        if (characteristic.properties.notify) {
+          _listenPort = characteristic;
+          _listenPortSubscription =
+              characteristic.value.listen(processRecievedData);
+        }
+        if (characteristic.properties.write) {
+          _writePort = characteristic;
+        }
+      }
+      _deviceStatusSubscription = _device!.state.listen((state) {
+        if (state == BluetoothDeviceState.connected) {
+          _isDeviceConnected = true;
+          _listenPort?.setNotifyValue(true);
+          _deviceUpdatesStreamController.sink.add(AppStrings.deviceConnected);
+        }
+        if (state == BluetoothDeviceState.disconnected) {
+          _isDeviceConnected = false;
+          _deviceUpdatesStreamController.sink.add(
+            AppStrings.deviceDisconnected,
+          );
+        }
+      });
+    } catch (e) {
+      log(e.toString());
+      await _device!.disconnect();
+    }
+  }
+
+  Future<void> disconnect() async {
+    try {
+      _deviceUpdatesStreamController.close();
+
+      await _deviceStatusSubscription?.cancel();
+      _deviceStatusSubscription = null;
+      await _listenPortSubscription?.cancel();
+      _listenPortSubscription = null;
+      _listenPort = null;
+      _writePort = null;
+      await _device?.disconnect();
+    } catch (e) {
+      log(e.toString());
+    }
+  }
+
+  void processRecievedData(List<int> value) {
+    if (value.isNotEmpty) {
+      // used for debuggin
+      // print("Recieved: ${String.fromCharCodes(value)}");
+      //
+
+      String parsedString = String.fromCharCodes(value);
+      List<String> splitedString = parsedString.split(' ').toList();
+
+      log('1');
+      log('2');
+      log('3');
+      log(parsedString);
+      log('3');
+      log('2');
+      log('1');
+      /* switch (parsedString.substring(0, 3)) {
+        case 'GSM':
+          {
+            mode = parseCurrentMode(splitedString[1]);
+            break;
+          }
+        case 'GSL':
+          {
+            _isLightOn = splitedString[1] == '1' ? true : false;
+            break;
+          }
+        case 'GSS':
+          {
+            parseCurrentParameters(splitedString);
+            break;
+          }
+        default:
+          break;
+      }
+
+      _deviceUpdatesStreamController.sink.add(parsedString); */
     }
   }
 
   void close() {
-    _scanResultsListener?.cancel();
-    _availableToConnectDeviceList.close();
+    _listenPortSubscription?.cancel();
+    _deviceUpdatesStreamController.sink.close();
+    _deviceUpdatesStreamController.close();
+    _deviceStatusSubscription?.cancel();
+    _writePort = null;
+    _listenPort = null;
+    _device?.disconnect();
   }
+
   /* BluetoothDevice? _device;
   BluetoothCharacteristic? _writePort;
   BluetoothCharacteristic? _listenPort;
@@ -131,38 +200,7 @@ class BlueDeviceService {
     });
   }
 
-  void processRecievedData(List<int> value) {
-    if (value.isNotEmpty) {
-      // used for debuggin
-      // print("Recieved: ${String.fromCharCodes(value)}");
-      //
-
-      String parsedString = String.fromCharCodes(value);
-      List<String> splitedString = parsedString.split(' ').toList();
-
-      switch (parsedString.substring(0, 3)) {
-        case 'GSM':
-          {
-            mode = parseCurrentMode(splitedString[1]);
-            break;
-          }
-        case 'GSL':
-          {
-            _isLightOn = splitedString[1] == '1' ? true : false;
-            break;
-          }
-        case 'GSS':
-          {
-            parseCurrentParameters(splitedString);
-            break;
-          }
-        default:
-          break;
-      }
-
-      _deviceUpdatesStreamController.sink.add(parsedString);
-    }
-  }
+  
 
   void parseCurrentParameters(List<String> splitedString) {
     List<int> listOfParameters = [];

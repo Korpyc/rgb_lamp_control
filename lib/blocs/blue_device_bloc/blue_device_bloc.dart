@@ -1,69 +1,69 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-import 'package:rgb_lamp_control/models/found_bluetooth_device.dart';
+import 'package:flutter_blue/flutter_blue.dart';
 import 'package:rgb_lamp_control/services/repositories/rgb_lamp_repo.dart';
 
 part 'blue_device_event.dart';
 part 'blue_device_state.dart';
 
 class BlueDeviceBloc extends Bloc<BlueDeviceEvent, BlueDeviceState> {
-  BlueDeviceBloc(this._rgbLampRepo) : super(BlueDeviceUnavailable()) {
-    _listenFoundDevices();
-  }
   final RgbLampRepo _rgbLampRepo;
 
-  List<FoundDevice> _foundDevices = [];
+  StreamSubscription? _lampUpdatesSubscription;
+  BlueDeviceBloc(this._rgbLampRepo) : super(BlueDeviceInitial()) {
+    on<BlueDeviceEvent>(
+      (event, emit) {
+        if (event is BlueDeviceRequestConnect) {
+          _connectDevice(event.device);
+        }
+        if (event is BlueDeviceUpdateEvent) {
+          if (_rgbLampRepo.isDeviceConnected) {
+            emit(BlueDeviceConnected());
+          }
+        }
 
-  bool _isScanEmpty = false;
-  bool _isScanStarted = false;
+        if (event is BlueDeviceDisconnectEvent) {
+          _disconnectDevice();
+          emit(BlueDeviceDisconnected());
+        }
+      },
+    );
+  }
+
+  Future<void> _listenLampUpdates() async {
+    if (_lampUpdatesSubscription == null) {
+      _lampUpdatesSubscription = _rgbLampRepo.lampUpdates.listen((_) {
+        add(BlueDeviceUpdateEvent());
+      });
+    }
+  }
+
+  void _connectDevice(BluetoothDevice device) async {
+    try {
+      await _listenLampUpdates();
+      _rgbLampRepo.connectDevice(device);
+    } catch (e) {
+      log(e.toString());
+    }
+  }
+
+  void _disconnectDevice() async {
+    try {
+      await _lampUpdatesSubscription?.cancel();
+      _lampUpdatesSubscription = null;
+
+      await _rgbLampRepo.disconnectDevice();
+    } catch (e) {
+      print(e.toString());
+    }
+  }
 
   @override
-  Stream<BlueDeviceState> mapEventToState(event) async* {
-    if (event is BlueDeviceStartScanEvent) {
-      _startScanning();
-      if (_foundDevices.isNotEmpty) {
-        yield BlueDeviceFound(_foundDevices);
-      } else {
-        yield BlueDeviceSearching();
-      }
-    }
-    if (event is BlueDeviceUpdateEvent) {
-      if (_foundDevices.isEmpty && !_isScanEmpty) {
-        _isScanEmpty = true;
-        yield BlueDeviceUnavailable();
-      } else if (_foundDevices.isNotEmpty) {
-        yield BlueDeviceFound(
-          _foundDevices,
-          isStillSearching: _isScanStarted,
-        );
-      }
-    }
-  }
-
-  void _startScanning() {
-    int durationInSeconds = 4;
-    _isScanStarted = true;
-    Timer(
-      Duration(seconds: durationInSeconds),
-      () {
-        if (_foundDevices.isEmpty) {
-          _isScanEmpty = false;
-        }
-        _isScanStarted = false;
-        add(BlueDeviceUpdateEvent());
-      },
-    );
-    _rgbLampRepo.startScanning(durationInSeconds);
-  }
-
-  void _listenFoundDevices() {
-    _rgbLampRepo.foundDevicesStream.listen(
-      (devices) {
-        _foundDevices = devices;
-        add(BlueDeviceUpdateEvent());
-      },
-    );
+  Future<void> close() {
+    _lampUpdatesSubscription?.cancel();
+    _rgbLampRepo.close();
+    return super.close();
   }
 }

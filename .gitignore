@@ -28,6 +28,7 @@
 .flutter-plugins-dependencies
 .packages
 pubspec.lock
+/ios/Podfile.lock
 .pub-cache/
 .pub/
 /build/

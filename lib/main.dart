@@ -4,8 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rgb_lamp_control/blocs/blue_adapter_state_bloc/blue_adapter_state_bloc.dart';
 import 'package:rgb_lamp_control/blocs/blue_device_bloc/blue_device_bloc.dart';
 import 'package:rgb_lamp_control/screens/blue_adapter_status_screen/blue_adapter_status_screen.dart';
-import 'package:rgb_lamp_control/screens/main_screen/main_screen.dart';
-import 'package:rgb_lamp_control/services/repositories/rgb_lamp_repo.dart';
+import 'package:rgb_lamp_control/screens/root_screen/root_screen.dart';
 import 'package:rgb_lamp_control/services/services.dart';
 
 void main() {
@@ -22,7 +21,7 @@ class MyApp extends StatelessWidget {
           create: (context) => BlueAdapterStateBloc(),
         ),
         BlocProvider(
-          create: (context) => BlueDeviceBloc(RgbLampRepoImpl(getIt())),
+          create: (context) => getIt<BlueDeviceBloc>(),
         ),
       ],
       child: MaterialApp(
@@ -33,7 +32,7 @@ class MyApp extends StatelessWidget {
             },
             builder: (context, state) {
               if (state is BlueAdapterOnState) {
-                return MainScreen();
+                return RootScreen();
               } else {
                 return BluetoothAdapterStatusScreen(
                   state: state,

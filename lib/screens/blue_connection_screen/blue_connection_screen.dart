@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import 'package:rgb_lamp_control/blocs/blue_device_bloc/blue_device_bloc.dart';
+
+import 'package:rgb_lamp_control/blocs/blue_search_bloc/blue_search_bloc.dart';
+import 'package:rgb_lamp_control/services/repositories/blue_search_repo.dart';
+import 'package:rgb_lamp_control/services/services.dart';
 
 class BlueConnectionScreen extends StatelessWidget {
   const BlueConnectionScreen({Key? key}) : super(key: key);
@@ -32,7 +35,7 @@ class BlueConnectionScreen extends StatelessWidget {
               ),
             ),
             Expanded(
-              child: BlocBuilder<BlueDeviceBloc, BlueDeviceState>(
+              child: BlocBuilder<BlueSearchBloc, BlueSearchState>(
                 builder: (context, state) {
                   if (state is BlueDeviceSearching) {
                     return Center(
@@ -62,7 +65,14 @@ class BlueConnectionScreen extends StatelessWidget {
                                     state.foundDevices[index].deviceName,
                                   ),
                                   trailing: MaterialButton(
-                                    onPressed: () {},
+                                    onPressed: () {
+                                      context.read<BlueDeviceBloc>().add(
+                                            BlueDeviceRequestConnect(
+                                              state
+                                                  .foundDevices[index].device,
+                                            ),
+                                          );
+                                    },
                                     child: Text('CONNECT'),
                                     color: Colors.black,
                                     textColor: Colors.white,
@@ -85,7 +95,13 @@ class BlueConnectionScreen extends StatelessWidget {
                             ),
                             subtitle: Text(state.foundDevices[index].uuid),
                             trailing: MaterialButton(
-                              onPressed: () {},
+                              onPressed: () {
+                                context.read<BlueDeviceBloc>().add(
+                                      BlueDeviceRequestConnect(
+                                        state.foundDevices[index].device,
+                                      ),
+                                    );
+                              },
                               child: Text('CONNECT'),
                               color: Colors.black,
                               textColor: Colors.white,
@@ -109,7 +125,7 @@ class BlueConnectionScreen extends StatelessWidget {
         builder: (context) {
           return FloatingActionButton(
             onPressed: () {
-              context.read<BlueDeviceBloc>().add(BlueDeviceStartScanEvent());
+              context.read<BlueSearchBloc>().add(BlueDeviceStartScanEvent());
             },
             child: Icon(Icons.search),
           );

@@ -1,7 +1,10 @@
+import 'dart:async';
+import 'dart:developer';
+
 import 'package:flutter_blue/flutter_blue.dart';
 
-import 'package:rgb_lamp_control/models/found_bluetooth_device.dart';
-import 'package:rgb_lamp_control/services/blue_device/blue_device_service.dart';
+import 'package:rgb_lamp_control/services/bluetooth/blue_device_service.dart';
+import 'package:rgb_lamp_control/util/strings.dart';
 
 enum RgbLampMode {
   rgb,
@@ -11,13 +14,21 @@ enum RgbLampMode {
 }
 
 abstract class RgbLampRepo {
-  void startScanning(int duration);
-  Stream<List<FoundDevice>> get foundDevicesStream;
-
+  Stream get lampUpdates;
+  bool get isDeviceConnected;
   Future<void> connectDevice(BluetoothDevice device);
+  Future<void> disconnectDevice();
+  void close();
 }
 
 class RgbLampRepoImpl extends RgbLampRepo {
+  StreamSubscription? _lampUpdatesSubscription;
+
+  StreamController<String> _lampUpdatesStreamController =
+      StreamController<String>.broadcast();
+
+  Stream get lampUpdates => _lampUpdatesStreamController.stream;
+
   // current mode of lamp light
   RgbLampMode _mode = RgbLampMode.undefined;
 
@@ -26,12 +37,43 @@ class RgbLampRepoImpl extends RgbLampRepo {
   final BlueDeviceService _deviceService;
   RgbLampRepoImpl(this._deviceService);
 
-  void startScanning(int duration) {
-    _deviceService.startScan(duration: duration);
+  void _listenUpdatesFromLamp() {
+    if (_lampUpdatesSubscription == null) {
+      _lampUpdatesSubscription = _deviceService.recievedValueStream.listen(
+        (event) {
+          if (event == AppStrings.deviceConnected) {
+            _lampUpdatesStreamController.sink.add('null');
+          }
+          log('Update from lamp: ${event.toString()}');
+        },
+      );
+    }
   }
 
-  Stream<List<FoundDevice>> get foundDevicesStream =>
-      _deviceService.availableToConnectDeviceList;
+  Future<void> connectDevice(BluetoothDevice device) async {
+    try {
+      await _deviceService.connectDevice(device);
+      _listenUpdatesFromLamp();
+    } catch (e) {
+      log(e.toString());
+      _lampUpdatesSubscription?.cancel();
+      _lampUpdatesSubscription = null;
+    }
+  }
 
-  Future<void> connectDevice(BluetoothDevice device) async {}
+  Future<void> disconnectDevice() async {
+    try {
+      await _lampUpdatesSubscription?.cancel();
+      _lampUpdatesSubscription = null;
+      await _deviceService.disconnect();
+    } catch (e) {
+      log(e.toString());
+    }
+  }
+
+  void close() {
+    _lampUpdatesSubscription?.cancel();
+    _lampUpdatesStreamController.close();
+    _deviceService.close();
+  }
 }
