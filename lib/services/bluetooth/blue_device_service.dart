@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:flutter/services.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 
 import 'package:rgb_lamp_control/util/constants.dart';
@@ -16,16 +17,19 @@ class BlueDeviceService {
   StreamController<String> _deviceUpdatesStreamController =
       StreamController<String>();
 
-  Stream get recievedValueStream => _deviceUpdatesStreamController.stream;
+  Stream<String> get recievedValueStream =>
+      _deviceUpdatesStreamController.stream;
 
   bool get isConnected => _isDeviceConnected;
   bool _isDeviceConnected = false;
+
+  bool _isWritePortBusy = false;
 
   // Function to connect device and setup connection
   Future<void> connectDevice(BluetoothDevice device) async {
     _device = device;
     try {
-      await _device!.connect(autoConnect: true);
+      await _device!.connect();
 
       List<BluetoothService> discoverServices =
           await _device!.discoverServices();
@@ -68,7 +72,11 @@ class BlueDeviceService {
 
   Future<void> disconnect() async {
     try {
-      _deviceUpdatesStreamController.close();
+      await _device?.disconnect();
+      _isDeviceConnected = false;
+      _deviceUpdatesStreamController.sink.add(
+        AppStrings.deviceDisconnected,
+      );
 
       await _deviceStatusSubscription?.cancel();
       _deviceStatusSubscription = null;
@@ -76,7 +84,8 @@ class BlueDeviceService {
       _listenPortSubscription = null;
       _listenPort = null;
       _writePort = null;
-      await _device?.disconnect();
+
+      await Future.delayed(Duration(milliseconds: 100));
     } catch (e) {
       log(e.toString());
     }
@@ -84,41 +93,37 @@ class BlueDeviceService {
 
   void processRecievedData(List<int> value) {
     if (value.isNotEmpty) {
-      // used for debuggin
-      // print("Recieved: ${String.fromCharCodes(value)}");
-      //
-
       String parsedString = String.fromCharCodes(value);
-      List<String> splitedString = parsedString.split(' ').toList();
 
-      log('1');
-      log('2');
-      log('3');
-      log(parsedString);
-      log('3');
-      log('2');
-      log('1');
-      /* switch (parsedString.substring(0, 3)) {
-        case 'GSM':
-          {
-            mode = parseCurrentMode(splitedString[1]);
-            break;
-          }
-        case 'GSL':
-          {
-            _isLightOn = splitedString[1] == '1' ? true : false;
-            break;
-          }
-        case 'GSS':
-          {
-            parseCurrentParameters(splitedString);
-            break;
-          }
-        default:
-          break;
+      _deviceUpdatesStreamController.sink.add(parsedString);
+    }
+  }
+
+  // Send string data to device
+  Future<void> sendData(String data, {isReload = true}) async {
+    try {
+      if (_isWritePortBusy) {
+        Future.delayed(Duration(milliseconds: 10), () {
+          sendData(data, isReload: isReload);
+        });
+      } else {
+        _isWritePortBusy = true;
+
+        await _writePort?.write(data.codeUnits, withoutResponse: false);
+
+        _isWritePortBusy = false;
       }
-
-      _deviceUpdatesStreamController.sink.add(parsedString); */
+    } on PlatformException catch (e) {
+      _isWritePortBusy = false;
+      if (isReload && e.code == 'write_characteristic_error') {
+        await Future.delayed(Duration(milliseconds: 20));
+        sendData(data, isReload: false);
+      } else {
+        log(e.toString());
+      }
+    } catch (e) {
+      _isWritePortBusy = false;
+      log(e.toString());
     }
   }
 

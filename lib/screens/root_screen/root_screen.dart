@@ -8,19 +8,8 @@ import 'package:rgb_lamp_control/screens/home_screen/home_screen.dart';
 import 'package:rgb_lamp_control/services/repositories/blue_search_repo.dart';
 import 'package:rgb_lamp_control/services/services.dart';
 
-class RootScreen extends StatefulWidget {
+class RootScreen extends StatelessWidget {
   RootScreen({Key? key}) : super(key: key);
-
-  @override
-  State<RootScreen> createState() => _RootScreenState();
-}
-
-class _RootScreenState extends State<RootScreen> {
-  /* @override
-  void reassemble() {
-    getIt<BlueDeviceBloc>().close();
-    super.reassemble();
-  } */
 
   @override
   Widget build(BuildContext context) {

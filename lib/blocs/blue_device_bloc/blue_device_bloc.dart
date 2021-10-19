@@ -3,6 +3,7 @@ import 'dart:developer';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_blue/flutter_blue.dart';
+
 import 'package:rgb_lamp_control/services/repositories/rgb_lamp_repo.dart';
 
 part 'blue_device_event.dart';
@@ -14,19 +15,25 @@ class BlueDeviceBloc extends Bloc<BlueDeviceEvent, BlueDeviceState> {
   StreamSubscription? _lampUpdatesSubscription;
   BlueDeviceBloc(this._rgbLampRepo) : super(BlueDeviceInitial()) {
     on<BlueDeviceEvent>(
-      (event, emit) {
+      (event, emit) async {
         if (event is BlueDeviceRequestConnect) {
-          _connectDevice(event.device);
+          await _connectDevice(event.device);
         }
         if (event is BlueDeviceUpdateEvent) {
           if (_rgbLampRepo.isDeviceConnected) {
-            emit(BlueDeviceConnected());
+            emit(
+              BlueDeviceConnected(
+                isLampOn: _rgbLampRepo.isLampOn,
+                mode: _rgbLampRepo.currentMode,
+              ),
+            );
+          } else {
+            emit(BlueDeviceDisconnected());
           }
         }
 
         if (event is BlueDeviceDisconnectEvent) {
-          _disconnectDevice();
-          emit(BlueDeviceDisconnected());
+          await _disconnectDevice();
         }
       },
     );
@@ -40,7 +47,7 @@ class BlueDeviceBloc extends Bloc<BlueDeviceEvent, BlueDeviceState> {
     }
   }
 
-  void _connectDevice(BluetoothDevice device) async {
+  Future<void> _connectDevice(BluetoothDevice device) async {
     try {
       await _listenLampUpdates();
       _rgbLampRepo.connectDevice(device);
@@ -49,14 +56,11 @@ class BlueDeviceBloc extends Bloc<BlueDeviceEvent, BlueDeviceState> {
     }
   }
 
-  void _disconnectDevice() async {
+  Future<void> _disconnectDevice() async {
     try {
-      await _lampUpdatesSubscription?.cancel();
-      _lampUpdatesSubscription = null;
-
       await _rgbLampRepo.disconnectDevice();
     } catch (e) {
-      print(e.toString());
+      log(e.toString());
     }
   }
 

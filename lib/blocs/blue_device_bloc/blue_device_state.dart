@@ -4,6 +4,13 @@ abstract class BlueDeviceState {}
 
 class BlueDeviceInitial extends BlueDeviceState {}
 
-class BlueDeviceConnected extends BlueDeviceState {}
+class BlueDeviceConnected extends BlueDeviceState {
+  final bool isLampOn;
+  final RgbLampMode mode;
+  BlueDeviceConnected({
+    required this.isLampOn,
+    required this.mode,
+  });
+}
 
 class BlueDeviceDisconnected extends BlueDeviceState {}
