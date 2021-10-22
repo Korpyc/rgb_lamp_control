@@ -28,6 +28,7 @@ abstract class RgbLampRepo {
   bool get isLampOn;
   Future<void> connectDevice(BluetoothDevice device);
   Future<void> disconnectDevice();
+  Future<void> sendData(String data);
   void close();
 }
 

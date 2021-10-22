@@ -1,9 +1,9 @@
-import 'package:rgb_lamp_control/services/bluetooth/blue_device_service.dart';
+import 'package:rgb_lamp_control/services/repositories/rgb_lamp_repo.dart';
 
 abstract class ControlService {
-  final BlueDeviceService deviceService;
+  final RgbLampRepo lampRepo;
   ControlService(
-    this.deviceService,
+    this.lampRepo,
   );
 
   Future<void> sendParams();
