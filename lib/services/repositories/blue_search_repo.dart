@@ -1,5 +1,5 @@
 import 'package:rgb_lamp_control/models/found_bluetooth_device.dart';
-import 'package:rgb_lamp_control/services/bluetooth/blue_search_service.dart';
+import 'package:rgb_lamp_control/services/bluetooth/blue_search_service/blue_search_service.dart';
 
 class BlueSearchRepo {
   late BlueSearchService _blueSearchService;

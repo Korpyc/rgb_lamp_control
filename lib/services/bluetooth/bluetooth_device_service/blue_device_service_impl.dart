@@ -4,10 +4,11 @@ import 'dart:developer';
 import 'package:flutter/services.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 
+import 'package:rgb_lamp_control/services/bluetooth/bluetooth_device_service/blue_device_service.dart';
 import 'package:rgb_lamp_control/util/constants.dart';
 import 'package:rgb_lamp_control/util/strings.dart';
 
-class BlueDeviceService {
+class BlueDeviceServiceImpl extends BlueDeviceService {
   BluetoothDevice? _device;
   StreamSubscription? _listenPortSubscription;
   StreamSubscription? _deviceStatusSubscription;

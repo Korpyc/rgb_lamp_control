@@ -6,7 +6,7 @@ import 'package:flutter_blue/flutter_blue.dart';
 import 'package:rgb_lamp_control/models/color_mode_params.dart';
 import 'package:rgb_lamp_control/models/fire_mode_params.dart';
 import 'package:rgb_lamp_control/models/rgb_mode_params.dart';
-import 'package:rgb_lamp_control/services/bluetooth/blue_device_service.dart';
+import 'package:rgb_lamp_control/services/bluetooth/bluetooth_device_service/blue_device_service.dart';
 import 'package:rgb_lamp_control/util/strings.dart';
 
 enum RgbLampMode {

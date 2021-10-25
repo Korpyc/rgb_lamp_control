@@ -7,6 +7,9 @@ import 'package:rgb_lamp_control/screens/blue_adapter_status_screen/blue_adapter
 import 'package:rgb_lamp_control/screens/root_screen/root_screen.dart';
 import 'package:rgb_lamp_control/services/services.dart';
 
+// should be false for release(working with bluetooth) mode
+bool isTestMode = true;
+
 void main() {
   servicesSetup();
   runApp(MyApp());
