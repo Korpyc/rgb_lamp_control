@@ -8,7 +8,7 @@ import 'package:rgb_lamp_control/screens/root_screen/root_screen.dart';
 import 'package:rgb_lamp_control/services/services.dart';
 
 // should be false for release(working with bluetooth) mode
-bool isTestMode = true;
+bool isTestMode = false;
 
 void main() {
   servicesSetup();

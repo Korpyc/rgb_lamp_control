@@ -14,3 +14,5 @@ class BlueDeviceUpdateEvent extends BlueDeviceEvent {}
 class BlueDeviceDisconnectEvent extends BlueDeviceEvent {}
 
 class BlueDeviceSendCommand extends BlueDeviceEvent {}
+
+class BlueDeviceLightSwitchEvent extends BlueDeviceEvent {}

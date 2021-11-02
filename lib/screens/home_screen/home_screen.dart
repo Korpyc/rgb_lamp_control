@@ -9,7 +9,6 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFF212327),
       body: BlocBuilder<BlueDeviceBloc, BlueDeviceState>(
         builder: (context, state) {
           if (state is BlueDeviceConnected) {
@@ -18,35 +17,51 @@ class HomeScreen extends StatelessWidget {
           return Container();
         },
       ),
-      drawer: Drawer(
-        child: Container(
-          color: Colors.blue[100],
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: BlocBuilder<BlueDeviceBloc, BlueDeviceState>(
-              builder: (context, state) {
-                if (state is BlueDeviceConnected) {
-                  return Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Text(state.isLampOn.toString()),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Text(state.mode.toString()),
-                      ),
-                      Spacer(),
-                      Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: _buildDisconnectButton(),
-                      ),
-                    ],
-                  );
-                } else
-                  return _buildDisconnectButton();
-              },
-            ),
+      drawer: _buildDrawer(),
+      floatingActionButton: _buildFloatingActionButton(),
+    );
+  }
+
+  Widget _buildFloatingActionButton() {
+    return FloatingActionButton(
+      child: Icon(
+        Icons.power_settings_new,
+      ),
+      onPressed: () {
+        getIt<BlueDeviceBloc>().add(BlueDeviceLightSwitchEvent());
+      },
+    );
+  }
+
+  Widget _buildDrawer() {
+    return Drawer(
+      child: Container(
+        color: Colors.blue[100],
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: BlocBuilder<BlueDeviceBloc, BlueDeviceState>(
+            builder: (context, state) {
+              if (state is BlueDeviceConnected) {
+                return Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Text(state.isLampOn.toString()),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Text(state.mode.toString()),
+                    ),
+                    Spacer(),
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: _buildDisconnectButton(),
+                    ),
+                  ],
+                );
+              } else
+                return _buildDisconnectButton();
+            },
           ),
         ),
       ),

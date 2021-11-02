@@ -18,8 +18,7 @@ class BlueDeviceBloc extends Bloc<BlueDeviceEvent, BlueDeviceState> {
       (event, emit) async {
         if (event is BlueDeviceRequestConnect) {
           await _connectDevice(event.device);
-        }
-        if (event is BlueDeviceUpdateEvent) {
+        } else if (event is BlueDeviceUpdateEvent) {
           if (_rgbLampRepo.isDeviceConnected) {
             emit(
               BlueDeviceConnected(
@@ -30,10 +29,10 @@ class BlueDeviceBloc extends Bloc<BlueDeviceEvent, BlueDeviceState> {
           } else {
             emit(BlueDeviceDisconnected());
           }
-        }
-
-        if (event is BlueDeviceDisconnectEvent) {
+        } else if (event is BlueDeviceDisconnectEvent) {
           await _disconnectDevice();
+        } else if (event is BlueDeviceLightSwitchEvent) {
+          _rgbLampRepo.lightSwitch();
         }
       },
     );
