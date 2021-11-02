@@ -1,6 +1,11 @@
 class AppConstants {
   static const String serviceUUID = '6E400001-B5A3-F393-E0A9-E50E24DCCA9E';
 
+  static const String getStatusCommand = '\$1;';
+
+  static const String turnOnCommand = '\$5,1;';
+  static const String tunfOffCommand = '\$5,0;';
+
   static const String rgbModeCommand = '\$4,0;';
   static const String hsvModeCommand = '\$4,1;';
   static const String colorModeCommand = '\$4,2;';

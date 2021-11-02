@@ -6,7 +6,8 @@ import 'package:flutter_blue/flutter_blue.dart';
 import 'package:rgb_lamp_control/models/color_mode_params.dart';
 import 'package:rgb_lamp_control/models/fire_mode_params.dart';
 import 'package:rgb_lamp_control/models/rgb_mode_params.dart';
-import 'package:rgb_lamp_control/services/bluetooth/blue_device_service.dart';
+import 'package:rgb_lamp_control/services/bluetooth/bluetooth_device_service/blue_device_service.dart';
+import 'package:rgb_lamp_control/util/constants.dart';
 import 'package:rgb_lamp_control/util/strings.dart';
 
 enum RgbLampMode {
@@ -28,6 +29,8 @@ abstract class RgbLampRepo {
   bool get isLampOn;
   Future<void> connectDevice(BluetoothDevice device);
   Future<void> disconnectDevice();
+  Future<void> sendData(String data);
+  Future<void> lightSwitch();
   void close();
 }
 
@@ -176,11 +179,22 @@ class RgbLampRepoImpl extends RgbLampRepo {
   }
 
   Future<void> getStatus() async {
-    return await _deviceService.sendData('\$1;');
+    return await _deviceService.sendData(AppConstants.getStatusCommand);
   }
 
   Future<void> sendData(String data) async {
     return await _deviceService.sendData(data);
+  }
+
+  Future<void> lightSwitch() async {
+    String sendCommand = '';
+    if (isLampOn) {
+      sendCommand = AppConstants.tunfOffCommand;
+    } else {
+      sendCommand = AppConstants.turnOnCommand;
+    }
+    await _deviceService.sendData(sendCommand);
+    getStatus();
   }
 
   void close() {

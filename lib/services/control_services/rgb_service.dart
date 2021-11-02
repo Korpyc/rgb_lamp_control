@@ -1,12 +1,12 @@
-/* import 'package:rgb_lamp_control/models/rgb_mode_params.dart';
-import 'package:rgb_lamp_control/services/blue_device/blue_device_service.dart';
+import 'package:rgb_lamp_control/models/rgb_mode_params.dart';
 import 'package:rgb_lamp_control/services/control_services/control_service.dart';
+import 'package:rgb_lamp_control/services/repositories/rgb_lamp_repo.dart';
 import 'package:rgb_lamp_control/util/constants.dart';
 
 class RgbService extends ControlService {
   RgbService(
-    BlueDeviceService deviceService,
-  ) : super(deviceService);
+    RgbLampRepo lampRepo,
+  ) : super(lampRepo);
 
   RGBModeParams _parameters = RGBModeParams();
 
@@ -24,9 +24,9 @@ class RgbService extends ControlService {
     int? greenColor,
     int? blueColor,
   }) async {
-    if (deviceService.isConnected) {
-      if (deviceService.mode != BlueDeviceMode.rgb) {
-        deviceService.sendData(
+    if (lampRepo.isDeviceConnected) {
+      if (lampRepo.currentMode != RgbLampMode.rgb) {
+        lampRepo.sendData(
           AppConstants.rgbModeCommand,
         );
         await Future.delayed(Duration(milliseconds: 5));
@@ -48,10 +48,9 @@ class RgbService extends ControlService {
       setupCommands += '${_parameters.whiteColor},';
       setupCommands += '1;';
 
-      deviceService.sendData(
+      lampRepo.sendData(
         setupCommands,
       );
     }
   }
 }
- */

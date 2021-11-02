@@ -1,11 +1,10 @@
 import 'dart:async';
 
 import 'package:flutter_blue/flutter_blue.dart';
-
 import 'package:rgb_lamp_control/models/found_bluetooth_device.dart';
-import 'package:rgb_lamp_control/util/constants.dart';
+import 'package:rgb_lamp_control/services/bluetooth/blue_search_service/blue_search_service.dart';
 
-class BlueSearchService {
+class BlueSearchServiceFake extends BlueSearchService {
   bool _isScanStarted = false;
 
   late FlutterBlue _bluetoothInstance;
@@ -18,7 +17,7 @@ class BlueSearchService {
   Stream<List<FoundDevice>> get availableToConnectDeviceList =>
       _availableToConnectDeviceList.stream;
 
-  BlueSearchService(this._bluetoothInstance) {
+  BlueSearchServiceFake(this._bluetoothInstance) {
     init();
   }
 
@@ -48,7 +47,6 @@ class BlueSearchService {
       _isScanStarted = true;
       List<ScanResult> result = await _bluetoothInstance.startScan(
         timeout: Duration(seconds: duration),
-        withServices: [Guid(AppConstants.serviceUUID)],
       );
       _isScanStarted = false;
       if (result.isEmpty) {

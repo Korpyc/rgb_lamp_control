@@ -19,8 +19,9 @@ class RootScreen extends StatelessWidget {
         builder: (context, state) {
           if (state is BlueDeviceConnected) {
             return HomeScreen();
-          } else
+          } else {
             return BlueConnectionScreen();
+          }
         },
       ),
     );
