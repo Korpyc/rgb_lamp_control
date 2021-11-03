@@ -30,7 +30,9 @@ class BlueDeviceServiceImpl extends BlueDeviceService {
   Future<void> connectDevice(BluetoothDevice device) async {
     _device = device;
     try {
-      await _device!.connect();
+      await _device!.connect(
+        timeout: Duration(seconds: 30),
+      );
 
       List<BluetoothService> discoverServices =
           await _device!.discoverServices();

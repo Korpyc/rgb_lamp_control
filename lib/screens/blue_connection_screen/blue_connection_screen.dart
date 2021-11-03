@@ -13,8 +13,12 @@ class BlueConnectionScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.blue[100],
       body: _buildBody(),
-      floatingActionButton: Builder(
-        builder: (context) {
+      floatingActionButton: BlocBuilder<BlueSearchBloc, BlueSearchState>(
+        builder: (context, state) {
+          if (state is BlueDeviceSearching ||
+              state is BlueDeviceFound && state.isStillSearching) {
+            return Container();
+          }
           return FloatingActionButton(
             onPressed: () {
               context.read<BlueSearchBloc>().add(BlueDeviceStartScanEvent());

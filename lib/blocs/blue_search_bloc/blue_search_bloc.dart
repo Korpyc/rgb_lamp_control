@@ -19,14 +19,18 @@ class BlueSearchBloc extends Bloc<BlueSearchEvent, BlueSearchState> {
   bool _isScanEmpty = false;
   bool _isScanStarted = false;
 
-  BlueSearchBloc(this._blueSearchRepo) : super(BlueDeviceUnavailable()) {
+  BlueSearchBloc(this._blueSearchRepo) : super(BlueDeviceSearching()) {
     _listenFoundDevices();
+    _startScanning();
     on<BlueSearchEvent>(
       (event, emit) {
         if (event is BlueDeviceStartScanEvent) {
           _startScanning();
           if (_foundDevices.isNotEmpty) {
-            emit(BlueDeviceFound(_foundDevices));
+            emit(BlueDeviceFound(
+              _foundDevices,
+              isStillSearching: _isScanStarted,
+            ));
           } else {
             emit(BlueDeviceSearching());
           }
