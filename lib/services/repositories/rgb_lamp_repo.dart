@@ -26,6 +26,7 @@ abstract class RgbLampRepo {
   Stream get lampUpdates;
   bool get isDeviceConnected;
   RgbLampMode get currentMode;
+  dynamic get currentParameters;
   bool get isLampOn;
   Future<void> connectDevice(BluetoothDevice device);
   Future<void> disconnectDevice();

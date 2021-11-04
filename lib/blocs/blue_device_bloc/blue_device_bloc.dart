@@ -24,6 +24,7 @@ class BlueDeviceBloc extends Bloc<BlueDeviceEvent, BlueDeviceState> {
               BlueDeviceConnected(
                 isLampOn: _rgbLampRepo.isLampOn,
                 mode: _rgbLampRepo.currentMode,
+                parameters: _rgbLampRepo.currentParameters,
               ),
             );
           } else {

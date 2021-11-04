@@ -3,8 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_material_color_picker/flutter_material_color_picker.dart';
 
+import 'package:rgb_lamp_control/blocs/blue_device_bloc/blue_device_bloc.dart';
 import 'package:rgb_lamp_control/cubits/color_select_cubit/color_select_cubit.dart';
+import 'package:rgb_lamp_control/models/color_mode_params.dart';
 import 'package:rgb_lamp_control/services/control_services/color_service.dart';
+import 'package:rgb_lamp_control/services/repositories/rgb_lamp_repo.dart';
 import 'package:rgb_lamp_control/services/services.dart';
 
 class SelectColorModeScreen extends StatelessWidget {
@@ -13,7 +16,23 @@ class SelectColorModeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => ColorSelectCubit(ColorService(getIt())),
+      create: (context) {
+        ColorModeParams? parameters;
+        if (context.read<BlueDeviceBloc>().state is BlueDeviceConnected) {
+          BlueDeviceConnected state =
+              context.read<BlueDeviceBloc>().state as BlueDeviceConnected;
+          if (state.mode == RgbLampMode.color &&
+              state.parameters != null &&
+              state.parameters is ColorModeParams) {
+            parameters = state.parameters;
+          }
+        }
+        if (parameters != null) {
+          return ColorSelectCubit(ColorService(getIt()))..update(parameters);
+        } else {
+          return ColorSelectCubit(ColorService(getIt()));
+        }
+      },
       child: BlocBuilder<ColorSelectCubit, ColorSelectState>(
         builder: (context, state) {
           return Container(
@@ -31,7 +50,9 @@ class SelectColorModeScreen extends StatelessWidget {
                         );
                   }
                 },
-                selectedColor: Colors.white,
+                selectedColor: _colors.elementAt(
+                  context.read<ColorSelectCubit>().parameters.numberOfColor,
+                ),
                 colors: _colors,
               ),
             ),
