@@ -28,6 +28,7 @@ dependencies:
   flutter_blue: ^0.8.0
   sleek_circular_slider: ^2.0.1
   circular_color_picker: ^1.0.0
+  flutter_material_color_picker: ^1.1.0+2
    
 
   # The following adds the Cupertino Icons font to your application.

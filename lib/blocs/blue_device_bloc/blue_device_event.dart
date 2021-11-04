@@ -13,6 +13,9 @@ class BlueDeviceUpdateEvent extends BlueDeviceEvent {}
 
 class BlueDeviceDisconnectEvent extends BlueDeviceEvent {}
 
-class BlueDeviceSendCommand extends BlueDeviceEvent {}
-
 class BlueDeviceLightSwitchEvent extends BlueDeviceEvent {}
+
+class BlueDeviceModeSwitchEvent extends BlueDeviceEvent {
+  final RgbLampMode mode;
+  BlueDeviceModeSwitchEvent(this.mode);
+}

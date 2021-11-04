@@ -33,6 +33,8 @@ class BlueDeviceBloc extends Bloc<BlueDeviceEvent, BlueDeviceState> {
           await _disconnectDevice();
         } else if (event is BlueDeviceLightSwitchEvent) {
           _rgbLampRepo.lightSwitch();
+        } else if (event is BlueDeviceModeSwitchEvent) {
+          _rgbLampRepo.modeSwitch(event.mode);
         }
       },
     );

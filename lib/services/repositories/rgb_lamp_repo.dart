@@ -31,6 +31,7 @@ abstract class RgbLampRepo {
   Future<void> disconnectDevice();
   Future<void> sendData(String data);
   Future<void> lightSwitch();
+  Future<void> modeSwitch(RgbLampMode mode);
   void close();
 }
 
@@ -101,6 +102,8 @@ class RgbLampRepoImpl extends RgbLampRepo {
       case '2':
         return RgbLampMode.rgb;
       case '3':
+        return RgbLampMode.color;
+      case '4':
         return RgbLampMode.color;
       case '7':
         return RgbLampMode.fire;
@@ -195,6 +198,21 @@ class RgbLampRepoImpl extends RgbLampRepo {
     }
     await _deviceService.sendData(sendCommand);
     getStatus();
+  }
+
+  Future<void> modeSwitch(RgbLampMode mode) async {
+    String sendCommand = '';
+    switch (mode) {
+      case RgbLampMode.rgb:
+        sendCommand = AppConstants.rgbModeCommand;
+        break;
+      case RgbLampMode.color:
+        sendCommand = AppConstants.colorSetModeCommand;
+        break;
+      default:
+        sendCommand = AppConstants.rgbModeCommand;
+    }
+    await _deviceService.sendData(sendCommand);
   }
 
   void close() {

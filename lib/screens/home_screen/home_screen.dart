@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:rgb_lamp_control/blocs/blue_device_bloc/blue_device_bloc.dart';
 import 'package:rgb_lamp_control/screens/rgb_mode_screen/rgb_mode_screen.dart';
+import 'package:rgb_lamp_control/screens/select_color_mode_screen/select_color_mode_screen.dart';
+import 'package:rgb_lamp_control/services/repositories/rgb_lamp_repo.dart';
 import 'package:rgb_lamp_control/services/services.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -12,7 +14,14 @@ class HomeScreen extends StatelessWidget {
       body: BlocBuilder<BlueDeviceBloc, BlueDeviceState>(
         builder: (context, state) {
           if (state is BlueDeviceConnected) {
-            return RgbModeScreen();
+            switch (state.mode) {
+              case RgbLampMode.rgb:
+                return RgbModeScreen();
+              case RgbLampMode.color:
+                return SelectColorModeScreen();
+              default:
+                Container();
+            }
           }
           return Container();
         },
@@ -23,12 +32,21 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildFloatingActionButton() {
-    return FloatingActionButton(
-      child: Icon(
-        Icons.power_settings_new,
-      ),
-      onPressed: () {
-        getIt<BlueDeviceBloc>().add(BlueDeviceLightSwitchEvent());
+    return BlocBuilder<BlueDeviceBloc, BlueDeviceState>(
+      builder: (context, state) {
+        if (state is BlueDeviceConnected) {
+          return FloatingActionButton(
+            backgroundColor: state.isLampOn ? Colors.green : Colors.red,
+            child: Icon(
+              Icons.power_settings_new,
+            ),
+            onPressed: () {
+              getIt<BlueDeviceBloc>().add(BlueDeviceLightSwitchEvent());
+            },
+          );
+        } else {
+          return Container();
+        }
       },
     );
   }
@@ -52,6 +70,18 @@ class HomeScreen extends StatelessWidget {
                       padding: const EdgeInsets.all(16.0),
                       child: Text(state.mode.toString()),
                     ),
+                    Column(
+                        children: RgbLampMode.values.map<Widget>((mode) {
+                      return TextButton(
+                        child: Text("$mode"),
+                        onPressed: () {
+                          context.read<BlueDeviceBloc>().add(
+                                BlueDeviceModeSwitchEvent(mode),
+                              );
+                          Navigator.pop(context);
+                        },
+                      );
+                    }).toList()),
                     Spacer(),
                     Padding(
                       padding: const EdgeInsets.all(16.0),
